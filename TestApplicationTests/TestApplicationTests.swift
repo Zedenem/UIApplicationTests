@@ -10,25 +10,38 @@ import XCTest
 @testable import TestApplication
 
 class TestApplicationTests: XCTestCase {
+  var window: UIWindow!
 
-    override func setUp() {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
+  override func setUp() {
+    super.setUp()
+  }
 
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+  override func tearDown() {
+    if window != nil && window.isKeyWindow {
+      window.resignKey()
+      window = nil
     }
+    super.tearDown()
+  }
 
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
+  func testWeirdViewControllerContentInsetChanged_WhenKeyWindowRootViewControllerIsDefined() {
+    let weirdViewController = WeirdViewController(parameters: [:])
 
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
+    window = UIWindow(frame: UIScreen.main.bounds)
+    window.rootViewController = UIViewController()
+    window.makeKeyAndVisible()
+
+    weirdViewController.viewDidLayoutSubviews()
+
+    XCTAssertEqual(weirdViewController.contentInset, UIEdgeInsets(top: 0, left: 0, bottom: 40, right: 0))
+  }
+
+  func testWeirdViewControllerContentInsetUnchanged_WhenKeyWindowRootViewControllerIsNotDefined() {
+    let weirdViewController = WeirdViewController(parameters: [:])
+
+    weirdViewController.viewDidLayoutSubviews()
+
+    XCTAssertEqual(weirdViewController.contentInset, .zero)
+  }
 
 }
